@@ -1,32 +1,54 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import create_engine
 from eralchemy2 import render_er
+from datetime import datetime
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
+class Follower(Base):
+    __tablename__ = 'follower'
+    user_id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False, unique=True)
+    password = Column(String(250))
+    dob = Column(DateTime)
+    last_login_time = Column(DateTime)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+class User(Base):
+    __tablename__ = 'user'
+    user_from_id = Column(Integer, primary_key=True)
+    user_to_id = Column(Integer, ForeignKey('user.user_id'))
+   
+class Media(Base):
+    __tablename__ = 'media'
+    follow_id = Column(Integer, primary_key=True)
+    user_id1 = Column(Integer, ForeignKey('user.user_id'))
+    user_id2 = Column(Integer, ForeignKey('user.user_id'))
+
+class Post(Base):
+    __tablename__ = 'post'
+    feed_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.user_id'))
+    content = Column(String(250))
+    photo_id = Column(Integer, ForeignKey('photo.photo_id'))
+    creation_date = Column(DateTime, default=datetime.utcnow)
+    photo = relationship(Photo)
+
+    class Comment(Base):
+    __tablename__ = 'comment'
+    feed_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.user_id'))
+    content = Column(String(250))
+    photo_id = Column(Integer, ForeignKey('photo.photo_id'))
+    creation_date = Column(DateTime, default=datetime.utcnow)
+    photo = relationship(Photo)
 
     def to_dict(self):
         return {}
+
 
 ## Draw from SQLAlchemy base
 try:
